@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="National Forest Monitoring System – Forest Information Platform, Kenya Forest Service">
+  <title>NFMS-FIP | National Forest Monitoring System</title>
+  <link rel="icon" href="assets/kfs-logo.png">
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header" id="top">
+    <div class="brand-wrap">
+      <div class="gov-logo"><img src="assets/kenya-crest.png" alt="Republic of Kenya"></div>
+      <div class="brand-divider"></div>
+      <div class="brand-copy">
+        <div class="brand-title">National Forest Monitoring System (NFMS-FIP)</div>
+        <div class="brand-subtitle">Forest Information Platform</div>
+        <div class="brand-tagline">Data for Sustainable Forest Monitoring</div>
+      </div>
+      <div class="header-actions">
+        <button class="header-search" type="button" id="searchToggle"><i class="fa-solid fa-magnifying-glass"></i><span>Search</span></button>
+        <button class="login-btn" type="button" id="loginOpen"><i class="fa-solid fa-user"></i><span>Login</span></button>
+        <img class="kfs-logo" src="assets/kfs-logo.png" alt="Kenya Forest Service">
+      </div>
+    </div>
+    <div class="search-bar" id="searchBar" aria-hidden="true">
+      <div class="search-inner">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input id="siteSearch" type="search" placeholder="Search NFMS-FIP…" aria-label="Search NFMS-FIP">
+        <button type="button" id="searchClose" aria-label="Close search">×</button>
+      </div>
+      <div class="search-results" id="searchResults"></div>
+    </div>
+
+    <nav class="main-nav" aria-label="Primary navigation">
+      <a class="nav-item active" href="#home" data-route="home"><i class="fa-solid fa-house"></i><span>Home</span></a>
+      <div class="nav-item dropdown">
+        <button type="button"><i class="fa-solid fa-circle-info"></i><span>About NFMS</span><i class="fa-solid fa-chevron-down chevron"></i></button>
+        <div class="dropdown-menu">
+          <a href="#about" data-route="about">What is NFMS</a>
+          <a href="#about" data-route="about">NFMS Framework</a>
+          <a href="#about" data-route="about">Institutional Framework</a>
+          <a href="#about" data-route="about">Governance Structure</a>
+          <a href="#about" data-route="about">Policies &amp; Legal Framework</a>
+          <a href="#about" data-route="about">Partners</a>
+        </div>
+      </div>
+      <div class="nav-item dropdown">
+        <button type="button"><i class="fa-solid fa-tree"></i><span>Forest Monitoring</span><i class="fa-solid fa-chevron-down chevron"></i></button>
+        <div class="dropdown-menu wide">
+          <a href="#monitoring" data-route="monitoring">Forest Cover Mapping</a>
+          <a href="#monitoring" data-route="monitoring">Land Cover Mapping</a>
+          <a href="#monitoring" data-route="monitoring">Forest Change</a>
+          <a href="#monitoring" data-route="monitoring">Deforestation</a>
+          <a href="#monitoring" data-route="monitoring">Forest Degradation</a>
+          <a href="#monitoring" data-route="monitoring">Forest Alerts</a>
+          <a href="#monitoring" data-route="monitoring">Fire Monitoring</a>
+          <a href="#monitoring" data-route="monitoring">NFI &amp; Field Monitoring</a>
+        </div>
+      </div>
+      <a class="nav-item" href="#mrv" data-route="mrv"><i class="fa-solid fa-cloud"></i><span>MRV &amp; Climate</span></a>
+      <a class="nav-item" href="#maps" data-route="maps"><i class="fa-regular fa-map"></i><span>Forest Data &amp; Maps</span></a>
+      <a class="nav-item" href="#reporting" data-route="reporting"><i class="fa-regular fa-file-lines"></i><span>Reporting &amp; Submissions</span></a>
+      <a class="nav-item" href="#knowledge" data-route="knowledge"><i class="fa-solid fa-database"></i><span>Data &amp; Knowledge</span></a>
+      <a class="nav-item" href="#quality" data-route="quality"><i class="fa-solid fa-shield-halved"></i><span>Quality &amp; Transparency</span></a>
+      <a class="nav-item" href="#governance" data-route="governance"><i class="fa-solid fa-people-group"></i><span>Safeguards &amp; Governance</span></a>
+      <a class="nav-item" href="#news" data-route="news"><i class="fa-regular fa-calendar-days"></i><span>News &amp; Events</span></a>
+      <a class="nav-item" href="#contact" data-route="contact"><i class="fa-regular fa-envelope"></i><span>Contact &amp; Support</span></a>
+      <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation"><i class="fa-solid fa-bars"></i></button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero" id="hero">
+      <div class="hero-overlay">
+        <div class="hero-content">
+          <h1>Healthy Forests<br>for a <span>Sustainable Kenya</span></h1>
+          <p>Monitoring <b>•</b> Managing <b>•</b> Conserving</p>
+        </div>
+      </div>
+    </section>
+
+    <div class="ticker">
+      <div class="ticker-icon"><i class="fa-solid fa-bullhorn"></i></div>
+      <div class="ticker-track" id="tickerTrack">
+        <span>Kenya's forest cover is our shared responsibility.</span><span>Let's protect, restore and grow our forests for future generations.</span><span>NFMS – Reliable data for informed decision-making.</span>
+      </div>
+      <div class="ticker-controls"><button type="button" id="tickerPrev">‹</button><button type="button" id="tickerNext">›</button><button type="button" id="tickerDots">•••</button></div>
+    </div>
+
+    <div class="mobile-nav" id="mobileNav">
+      <a href="#home" data-route="home">Home</a><a href="#about" data-route="about">About NFMS</a><a href="#monitoring" data-route="monitoring">Forest Monitoring</a><a href="#mrv" data-route="mrv">MRV &amp; Climate</a><a href="#maps" data-route="maps">Forest Data &amp; Maps</a><a href="#reporting" data-route="reporting">Reporting &amp; Submissions</a><a href="#knowledge" data-route="knowledge">Data &amp; Knowledge</a><a href="#quality" data-route="quality">Quality &amp; Transparency</a><a href="#governance" data-route="governance">Safeguards &amp; Governance</a><a href="#news" data-route="news">News &amp; Events</a><a href="#contact" data-route="contact">Contact &amp; Support</a>
+    </div>
+
+    <div class="page-shell">
+      <aside class="sidebar" aria-label="Section navigation">
+        <div class="side-title"><i class="fa-solid fa-circle-info"></i><span id="sideTitle">About NFMS</span><i class="fa-solid fa-chevron-down"></i></div>
+        <div class="side-links" id="sideLinks">
+          <a href="#about" data-route="about" class="active">What is NFMS</a>
+          <a href="#about" data-route="about">NFMS Framework</a>
+          <a href="#about" data-route="about">Institutional Framework</a>
+          <a href="#about" data-route="about">Governance Structure</a>
+          <a href="#about" data-route="about">Policies &amp; Legal Framework</a>
+          <a href="#about" data-route="about">Partners</a>
+        </div>
+        <div class="side-group"><a href="#monitoring" data-route="monitoring"><i class="fa-solid fa-tree"></i>Forest Monitoring <span>›</span></a></div>
+        <div class="side-group"><a href="#mrv" data-route="mrv"><i class="fa-solid fa-cloud"></i>MRV &amp; Climate <span>›</span></a></div>
+        <div class="side-group"><a href="#maps" data-route="maps"><i class="fa-regular fa-map"></i>Forest Data &amp; Maps <span>›</span></a></div>
+        <div class="side-group"><a href="#reporting" data-route="reporting"><i class="fa-regular fa-file-lines"></i>Reporting &amp; Submissions <span>›</span></a></div>
+        <div class="side-group"><a href="#knowledge" data-route="knowledge"><i class="fa-solid fa-database"></i>Data &amp; Knowledge <span>›</span></a></div>
+        <div class="side-group"><a href="#quality" data-route="quality"><i class="fa-solid fa-shield-halved"></i>Quality &amp; Transparency <span>›</span></a></div>
+        <div class="side-group"><a href="#governance" data-route="governance"><i class="fa-solid fa-people-group"></i>Safeguards &amp; Governance <span>›</span></a></div>
+        <div class="side-group"><a href="#news" data-route="news"><i class="fa-regular fa-calendar-days"></i>News &amp; Events <span>›</span></a></div>
+        <div class="side-group"><a href="#contact" data-route="contact"><i class="fa-regular fa-envelope"></i>Contact &amp; Support <span>›</span></a></div>
+      </aside>
+
+      <section class="content-panel" id="contentPanel" tabindex="-1"></section>
+    </div>
+  </main>
+
+  <footer class="site-footer" id="contact">
+    <div class="footer-inner">
+      <div><div class="footer-title">NFMS-FIP</div><p>National Forest Monitoring System – Forest Information Platform</p></div>
+      <div><div class="footer-title">Quick Links</div><div class="footer-links"><a href="#about">About NFMS</a><a href="#monitoring">Forest Monitoring</a><a href="#maps">Forest Data &amp; Maps</a><a href="#reporting">Data Submission</a></div></div>
+      <div><div class="footer-title">Contact</div><p>Kenya Forest Service<br>Forest Information Systems &amp; Monitoring<br><a href="mailto:nfms@kenyaforestservice.org">nfms@kenyaforestservice.org</a></p></div>
+    </div>
+    <div class="footer-bottom">© <span id="year"></span> Kenya Forest Service · NFMS-FIP</div>
+  </footer>
+
+  <div class="modal-backdrop" id="loginModal" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+      <button class="modal-close" type="button" id="loginClose">×</button>
+      <div class="modal-icon"><i class="fa-solid fa-user-lock"></i></div>
+      <h2 id="loginTitle">NFMS-FIP Login</h2>
+      <p>Select your authorized user level to enter the data submission workspace.</p>
+      <label>Username or email<input id="loginUser" type="text" placeholder="name@institution.org"></label>
+      <label>Password<input id="loginPassword" type="password" placeholder="••••••••"></label>
+      <label>User level<select id="loginRole"><option value="provider">Data Provider</option><option value="reviewer">Technical Reviewer / NTC</option><option value="superuser">KFS NFMS Super User</option></select></label>
+      <button class="primary-btn full" id="loginSubmit">Login to workspace</button>
+      <div class="demo-note">Demo frontend only. Connect this form to your institutional identity provider / Django backend for production authentication.</div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
