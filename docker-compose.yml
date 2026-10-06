@@ -1,0 +1,194 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-nfms_fip}
+      POSTGRES_USER: ${POSTGRES_USER:-nfms}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-this-password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-nfms} -d ${POSTGRES_DB:-nfms_fip}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-nfmsminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-change-this-minio-password}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9001:9001"
+    expose:
+      - "9000"
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_started
+    entrypoint: ["/bin/sh", "-c"]
+    command: >-
+      "mc alias set local http://minio:9000 ${MINIO_ROOT_USER:-nfmsminio} ${MINIO_ROOT_PASSWORD:-change-this-minio-password}
+      && mc mb -p local/${S3_BUCKET:-nfms-fip} || true
+      && mc anonymous set none local/${S3_BUCKET:-nfms-fip} || true"
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment:
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-this-long-secret}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS:-http://localhost,http://127.0.0.1}
+      POSTGRES_DB: ${POSTGRES_DB:-nfms_fip}
+      POSTGRES_USER: ${POSTGRES_USER:-nfms}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-this-password}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      S3_ENDPOINT_URL: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-nfmsminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-change-this-minio-password}
+      S3_BUCKET: ${S3_BUCKET:-nfms-fip}
+      S3_REGION: ${S3_REGION:-us-east-1}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+      GEOSERVER_URL: http://geoserver:8080/geoserver
+      GEOSERVER_WORKSPACE: nfms
+      GEOSERVER_ADMIN_USER: ${GEOSERVER_ADMIN_USER:-admin}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD:-change-this-geoserver-password}
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-500}
+      DEMO_PASSWORD: ${DEMO_PASSWORD:-ChangeMe123!}
+    command: >-
+      sh -c 'python manage.py migrate
+      && python manage.py collectstatic --noinput
+      && python manage.py seed_nfms --demo-password "$${DEMO_PASSWORD:-ChangeMe123!}"
+      && gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-3} --timeout 120 --access-logfile -'
+    volumes:
+      - nfms_media:/app/media
+      - nfms_static:/app/staticfiles
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+      geoserver:
+        condition: service_started
+
+  worker:
+    build:
+      context: ./backend
+    restart: unless-stopped
+    environment:
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-0}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-this-long-secret}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      POSTGRES_DB: ${POSTGRES_DB:-nfms_fip}
+      POSTGRES_USER: ${POSTGRES_USER:-nfms}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-this-password}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      S3_ENDPOINT_URL: http://minio:9000
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-nfmsminio}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-change-this-minio-password}
+      S3_BUCKET: ${S3_BUCKET:-nfms-fip}
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/1
+    command: celery -A config worker --loglevel=INFO --concurrency=${CELERY_CONCURRENCY:-2}
+    volumes:
+      - nfms_media:/app/media
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+  geoserver:
+    image: kartoza/geoserver:3.0.1
+    restart: unless-stopped
+    environment:
+      GEOSERVER_ADMIN_USER: ${GEOSERVER_ADMIN_USER:-admin}
+      GEOSERVER_ADMIN_PASSWORD: ${GEOSERVER_ADMIN_PASSWORD:-change-this-geoserver-password}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: ${POSTGRES_DB:-nfms_fip}
+      POSTGRES_USER: ${POSTGRES_USER:-nfms}
+      POSTGRES_PASS: ${POSTGRES_PASSWORD:-change-this-password}
+      SAMPLE_DATA: ${GEOSERVER_SAMPLE_DATA:-NO}
+    ports:
+      - "8600:8080"
+    volumes:
+      - geoserver_data:/opt/geoserver/data_dir
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    image: nginx:1.29-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - nfms_static:/static:ro
+      - nfms_media:/media:ro
+    depends_on:
+      - backend
+      - geoserver
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    profiles: ["admin"]
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@nfms.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-change-this-pgadmin-password}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - db
+
+  flower:
+    image: mher/flower:latest
+    restart: unless-stopped
+    profiles: ["admin"]
+    command: celery --broker=redis://redis:6379/0 flower --port=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+  geoserver_data:
+  nfms_media:
+  nfms_static:
+  pgadmin_data:
